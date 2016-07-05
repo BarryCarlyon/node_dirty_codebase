@@ -1,34 +1,40 @@
 var parseString = require('xml2js').parseString;
 var request = require('request');
 
-var codebase_config;
+var _codebase_config;
 
 exports.codebase.setConfig = function(config) {
-    codebase_config = config;
+    _codebase_config = config;
+    _codebase_config.debug = (undefined === config.debug) ? false : config.debug;
 }
 
-var getCodebase = function(channel) {
+/* Get Open Tickets */
+exports.codebase.getTickets = function() {
     request({
-        url: 'https://api3.codebasehq.com/' + codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
+        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': codebase_config.username,
-            'pass': codebase_config.password
+            'user': _codebase_config.username,
+            'pass': _codebase_config.password
         }
     }, function (error, response, body) {
         if (error) {
-            console.log(error);
-            return;
+            if (_codebase_config.debug) {
+                console.log(error);
+            }
+            return false;
         }
         if (response.statusCode == 200) {
             parseString(body, {
                 charkey: 'value'
             }, function(err, result) {
                 if (err) {
-                    console.log(err);
+                    if (_codebase_config.debug) {
+                        console.log(err);
+                    }
                     return false;
                 } else {
                     return result;
@@ -39,89 +45,94 @@ var getCodebase = function(channel) {
         }
     });
 }
-var createCodebase = function(channel, summary, description) {
+
+exports.codebase.createTicket = function(summary, description) {
     var xml = '<ticket>'
         + '<summary>' + summary + '</summary>'
         + '<description><![CDATA[' + description + ']]></description>'
         + '</ticket>';
 
     request.post({
-        url: 'https://api3.codebasehq.com/' + config.codebase.project + '/tickets?query=not-status:Completed,Invalid',
+        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': config.codebase.username,
-            'pass': config.codebase.password
+            'user': _codebase_config.username,
+            'pass': _codebase_config.password
         },
         body: xml
     }, function (error, response, body) {
         if (error) {
-            console.log(error);
-            return;
+            if (_codebase_config.debug) {
+                console.log(error);
+            }
+            return false;
         }
         if (response.statusCode == 201) {
             // was created
             parseString(body, {
                 charkey: 'value'
             }, function(err, result) {
-//                console.log(result);
                 if (err) {
-                    console.log(err);
-                    channel.send('> Failed to parse but created');
+                    if (_codebase_config.debug) {
+                        console.log(err);
+                    }
+                    return false;
                 } else {
-                    channel.send('> Created: ' + result.ticket['ticket-id'][0]['value']);
+                    return result.ticket['ticket-id'][0]['value'];
                 }
             });
         } else {
-            channel.send('> Fail: ' + response.statusCode);
+            return false;
         }
     });
 }
-var addCommentTicketCodebase = function(channel, ticket_id, comment) {
+exports.codebase.addCommentToTicket = function(ticket_id, comment) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '</ticket-note>';
 
     request.post({
-        url: 'https://api3.codebasehq.com/' + config.codebase.project + '/tickets/' + ticket_id + '/notes',
+        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': config.codebase.username,
-            'pass': config.codebase.password
+            'user': _codebase_config.username,
+            'pass': _codebase_config.password
         },
         body: xml
     }, function (error, response, body) {
         if (error) {
-            console.log(error);
-            return;
+            if (_codebase_config.debug) {
+                console.log(error);
+            }
+            return false;
         }
         if (response.statusCode == 201) {
             // was created
-console.log(body);
             parseString(body, {
                 charkey: 'value'
             }, function(err, result) {
-                console.log(result);
-                console.log(result['ticket-note']);
                 if (err) {
-                    console.log(err);
-                    channel.send('> Failed to parse but created');
+                    if (_codebase_config.debug) {
+                        console.log(err);
+                    }
+                    return false;
                 } else {
-                    channel.send('> Created: ' + result['ticket-note']['id'][0]['value']);
+                    return result['ticket-note']['id'][0]['value'];
                 }
             });
         } else {
-            channel.send('> Fail: ' + response.statusCode);
+            return false;
         }
     });
 }
 
-var updateTicketCodebase = function(channel, ticket_id, summary, comment) {
+exports.codebase.reviseTicket = function(ticket_id, summary, comment) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '<changes>'
@@ -130,38 +141,43 @@ var updateTicketCodebase = function(channel, ticket_id, summary, comment) {
         + '</ticket-note>';
 
     request.post({
-        url: 'https://api3.codebasehq.com/' + config.codebase.project + '/tickets/' + ticket_id + '/notes',
+        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets/' + ticket_id + '/notes',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': config.codebase.username,
-            'pass': config.codebase.password
+            'user': _codebase_config.username,
+            'pass': _codebase_config.password
         },
         body: xml
     }, function (error, response, body) {
         if (error) {
-            console.log(error);
-            return;
+            if (_codebase_config.debug) {
+                console.log(error);
+            }
+            return false;
         }
         if (response.statusCode == 201) {
             // was created
-console.log(body);
             parseString(body, {
                 charkey: 'value'
             }, function(err, result) {
-                console.log(result);
-                console.log(result['ticket-note']);
+                if (_codebase_config.debug) {
+                    console.log(result);
+                    console.log(result['ticket-note']);
+                }
                 if (err) {
-                    console.log(err);
-                    channel.send('> Failed to parse but created');
+                    if (_codebase_config.debug) {
+                        console.log(err);
+                    }
+                    return false;
                 } else {
-                    channel.send('> Created: ' + result['ticket-note']['id'][0]['value']);
+                    return result['ticket-note']['id'][0]['value'];
                 }
             });
         } else {
-            channel.send('> Fail: ' + response.statusCode);
+            return false;
         }
     });
 }
