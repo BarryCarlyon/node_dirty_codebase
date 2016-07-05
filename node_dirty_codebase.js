@@ -3,13 +3,13 @@ var request = require('request');
 
 var _codebase_config;
 
-exports.codebase.setConfig = function(config) {
+exports.setConfig = function(config) {
     _codebase_config = config;
     _codebase_config.debug = (undefined === config.debug) ? false : config.debug;
 }
 
 /* Get Open Tickets */
-exports.codebase.getTickets = function() {
+exports.getTickets = function() {
     request({
         url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
@@ -46,7 +46,7 @@ exports.codebase.getTickets = function() {
     });
 }
 
-exports.codebase.createTicket = function(summary, description) {
+exports.createTicket = function(summary, description) {
     var xml = '<ticket>'
         + '<summary>' + summary + '</summary>'
         + '<description><![CDATA[' + description + ']]></description>'
@@ -89,7 +89,7 @@ exports.codebase.createTicket = function(summary, description) {
         }
     });
 }
-exports.codebase.addCommentToTicket = function(ticket_id, comment) {
+exports.addCommentToTicket = function(ticket_id, comment) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '</ticket-note>';
@@ -132,7 +132,7 @@ exports.codebase.addCommentToTicket = function(ticket_id, comment) {
     });
 }
 
-exports.codebase.reviseTicket = function(ticket_id, summary, comment) {
+exports.reviseTicket = function(ticket_id, summary, comment) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '<changes>'
