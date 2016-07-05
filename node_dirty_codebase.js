@@ -1,29 +1,28 @@
 var parseString = require('xml2js').parseString;
 var request = require('request');
 
-var _codebase_config;
-
 exports.setConfig = function(config) {
-    _codebase_config = config;
-    _codebase_config.debug = (undefined === config.debug) ? false : config.debug;
+    this.config = config;
+    this.config.debug = (undefined === config.debug) ? false : config.debug;
+
     return this;
 }
 
 /* Get Open Tickets */
 exports.getTickets = function() {
     request({
-        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
+        url: 'https://api3.codebasehq.com/' + this.config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': _codebase_config.username,
-            'pass': _codebase_config.password
+            'user': this.config.username,
+            'pass': this.config.password
         }
     }, function (error, response, body) {
         if (error) {
-            if (_codebase_config.debug) {
+            if (this.config.debug) {
                 console.log(error);
             }
             return false;
@@ -33,7 +32,7 @@ exports.getTickets = function() {
                 charkey: 'value'
             }, function(err, result) {
                 if (err) {
-                    if (_codebase_config.debug) {
+                    if (this.config.debug) {
                         console.log(err);
                     }
                     return false;
@@ -42,6 +41,9 @@ exports.getTickets = function() {
                 }
             });
         } else {
+            if (self.config.debug) {
+                console.log(response.statusCode);
+            }
             return false;
         }
     });
@@ -54,19 +56,19 @@ exports.createTicket = function(summary, description) {
         + '</ticket>';
 
     request.post({
-        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
+        url: 'https://api3.codebasehq.com/' + this.config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': _codebase_config.username,
-            'pass': _codebase_config.password
+            'user': this.config.username,
+            'pass': this.config.password
         },
         body: xml
     }, function (error, response, body) {
         if (error) {
-            if (_codebase_config.debug) {
+            if (this.config.debug) {
                 console.log(error);
             }
             return false;
@@ -77,7 +79,7 @@ exports.createTicket = function(summary, description) {
                 charkey: 'value'
             }, function(err, result) {
                 if (err) {
-                    if (_codebase_config.debug) {
+                    if (this.config.debug) {
                         console.log(err);
                     }
                     return false;
@@ -86,29 +88,33 @@ exports.createTicket = function(summary, description) {
                 }
             });
         } else {
+            if (self.config.debug) {
+                console.log(response.statusCode);
+            }
             return false;
         }
     });
 }
+
 exports.addCommentToTicket = function(ticket_id, comment) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '</ticket-note>';
 
     request.post({
-        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets?query=not-status:Completed,Invalid',
+        url: 'https://api3.codebasehq.com/' + this.config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': _codebase_config.username,
-            'pass': _codebase_config.password
+            'user': this.config.username,
+            'pass': this.config.password
         },
         body: xml
     }, function (error, response, body) {
         if (error) {
-            if (_codebase_config.debug) {
+            if (this.config.debug) {
                 console.log(error);
             }
             return false;
@@ -119,7 +125,7 @@ exports.addCommentToTicket = function(ticket_id, comment) {
                 charkey: 'value'
             }, function(err, result) {
                 if (err) {
-                    if (_codebase_config.debug) {
+                    if (this.config.debug) {
                         console.log(err);
                     }
                     return false;
@@ -128,6 +134,9 @@ exports.addCommentToTicket = function(ticket_id, comment) {
                 }
             });
         } else {
+            if (self.config.debug) {
+                console.log(response.statusCode);
+            }
             return false;
         }
     });
@@ -142,19 +151,19 @@ exports.reviseTicket = function(ticket_id, summary, comment) {
         + '</ticket-note>';
 
     request.post({
-        url: 'https://api3.codebasehq.com/' + _codebase_config.project + '/tickets/' + ticket_id + '/notes',
+        url: 'https://api3.codebasehq.com/' + this.config.project + '/tickets/' + ticket_id + '/notes',
         headers: {
             'Accept': 'application/xml',
             'Content-type': 'application/xml',
         },
         auth: {
-            'user': _codebase_config.username,
-            'pass': _codebase_config.password
+            'user': this.config.username,
+            'pass': this.config.password
         },
         body: xml
     }, function (error, response, body) {
         if (error) {
-            if (_codebase_config.debug) {
+            if (this.config.debug) {
                 console.log(error);
             }
             return false;
@@ -164,12 +173,12 @@ exports.reviseTicket = function(ticket_id, summary, comment) {
             parseString(body, {
                 charkey: 'value'
             }, function(err, result) {
-                if (_codebase_config.debug) {
+                if (this.config.debug) {
                     console.log(result);
                     console.log(result['ticket-note']);
                 }
                 if (err) {
-                    if (_codebase_config.debug) {
+                    if (this.config.debug) {
                         console.log(err);
                     }
                     return false;
@@ -178,6 +187,9 @@ exports.reviseTicket = function(ticket_id, summary, comment) {
                 }
             });
         } else {
+            if (self.config.debug) {
+                console.log(response.statusCode);
+            }
             return false;
         }
     });
