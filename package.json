@@ -1,0 +1,23 @@
+{
+  "name": "node_dirty_codebase",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node_dirty_codebase.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/BarryCarlyon/node_dirty_codebase.git"
+  },
+  "author": "Barry Carlyon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BarryCarlyon/node_dirty_codebase/issues"
+  },
+  "homepage": "https://github.com/BarryCarlyon/node_dirty_codebase#readme",
+  "dependencies": {
+    "request": "^2.72.0",
+    "xml2js": "^0.4.16"
+  }
+}
