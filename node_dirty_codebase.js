@@ -6,6 +6,7 @@ var _codebase_config;
 exports.setConfig = function(config) {
     _codebase_config = config;
     _codebase_config.debug = (undefined === config.debug) ? false : config.debug;
+    return this;
 }
 
 /* Get Open Tickets */
