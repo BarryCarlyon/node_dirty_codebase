@@ -9,7 +9,7 @@ exports.setConfig = function(config) {
 }
 
 /* Get Open Tickets */
-exports.getTickets = function() {
+exports.getTickets = function(cb) {
     request({
         url: 'https://api3.codebasehq.com/' + this.config.project + '/tickets?query=not-status:Completed,Invalid',
         headers: {
@@ -25,9 +25,8 @@ exports.getTickets = function() {
             if (this.config.debug) {
                 console.log(error);
             }
-            return false;
-        }
-        if (response.statusCode == 200) {
+            cb(false);
+        } else if (response.statusCode == 200) {
             parseString(body, {
                 charkey: 'value'
             }, function(err, result) {
@@ -35,21 +34,21 @@ exports.getTickets = function() {
                     if (this.config.debug) {
                         console.log(err);
                     }
-                    return false;
+                    cb(false);
                 } else {
-                    return result;
+                    cb(result);
                 }
             });
         } else {
             if (self.config.debug) {
                 console.log(response.statusCode);
             }
-            return false;
+            cb(false);
         }
     });
 }
 
-exports.createTicket = function(summary, description) {
+exports.createTicket = function(summary, description, cb) {
     var xml = '<ticket>'
         + '<summary>' + summary + '</summary>'
         + '<description><![CDATA[' + description + ']]></description>'
@@ -71,9 +70,8 @@ exports.createTicket = function(summary, description) {
             if (this.config.debug) {
                 console.log(error);
             }
-            return false;
-        }
-        if (response.statusCode == 201) {
+            cb(false);
+        } else if (response.statusCode == 201) {
             // was created
             parseString(body, {
                 charkey: 'value'
@@ -82,21 +80,21 @@ exports.createTicket = function(summary, description) {
                     if (this.config.debug) {
                         console.log(err);
                     }
-                    return false;
+                    cb(false);
                 } else {
-                    return result.ticket['ticket-id'][0]['value'];
+                    cb(result.ticket['ticket-id'][0]['value']);
                 }
             });
         } else {
             if (self.config.debug) {
                 console.log(response.statusCode);
             }
-            return false;
+            cb(false);
         }
     });
 }
 
-exports.addCommentToTicket = function(ticket_id, comment) {
+exports.addCommentToTicket = function(ticket_id, comment, cb) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '</ticket-note>';
@@ -117,9 +115,8 @@ exports.addCommentToTicket = function(ticket_id, comment) {
             if (this.config.debug) {
                 console.log(error);
             }
-            return false;
-        }
-        if (response.statusCode == 201) {
+            cb(false);
+        } else if (response.statusCode == 201) {
             // was created
             parseString(body, {
                 charkey: 'value'
@@ -128,21 +125,21 @@ exports.addCommentToTicket = function(ticket_id, comment) {
                     if (this.config.debug) {
                         console.log(err);
                     }
-                    return false;
+                    cb(false);
                 } else {
-                    return result['ticket-note']['id'][0]['value'];
+                    cb(result['ticket-note']['id'][0]['value']);
                 }
             });
         } else {
             if (self.config.debug) {
                 console.log(response.statusCode);
             }
-            return false;
+            cb(false);
         }
     });
 }
 
-exports.reviseTicket = function(ticket_id, summary, comment) {
+exports.reviseTicket = function(ticket_id, summary, comment, cb) {
     var xml = '<ticket-note>'
         + '<content>' + comment + '</content>'
         + '<changes>'
@@ -166,9 +163,8 @@ exports.reviseTicket = function(ticket_id, summary, comment) {
             if (this.config.debug) {
                 console.log(error);
             }
-            return false;
-        }
-        if (response.statusCode == 201) {
+            cb(false);
+        } else if (response.statusCode == 201) {
             // was created
             parseString(body, {
                 charkey: 'value'
@@ -181,16 +177,16 @@ exports.reviseTicket = function(ticket_id, summary, comment) {
                     if (this.config.debug) {
                         console.log(err);
                     }
-                    return false;
+                    cb(false);
                 } else {
-                    return result['ticket-note']['id'][0]['value'];
+                    cb(result['ticket-note']['id'][0]['value']);
                 }
             });
         } else {
             if (self.config.debug) {
                 console.log(response.statusCode);
             }
-            return false;
+            cb(false);
         }
     });
 }
